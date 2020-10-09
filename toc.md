@@ -6,4 +6,4 @@
 
 **环境搭建：**  [CentOS 下 C 语言开发环境的构建](basic\EnvBuild.md) 
 
-**基本语法：** [格式化输出 printf](basic\printf.md) |
+**基本语法：** [格式化输出 printf](basic\printf.md) | [变量和常量](basic\varconst.md) 
