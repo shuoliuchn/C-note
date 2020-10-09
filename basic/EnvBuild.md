@@ -455,13 +455,30 @@ ln -s /usr/src/kernels/2.6.32-754.33.1.el6.i686/ /usr/src/linux
 
 然后还可以点击 VirtualBox 的设备菜单，设置文件拖放和共享粘贴板。
 
-注：使用 VirtualBox6.1 + CentOS6.10 安装增强工具可能会不成功，可以参见这篇博客：https://blog.csdn.net/v80/article/details/104769422
+注，使用 VirtualBox 6.1 + CentOS 6.10 安装增强工具可能会不成功，可以按照如下步骤尝试操作：
+
+1. 切换至 root 用户，使用如下命令升级内核至最新版本
+
+   ```bash
+   yum -y install kernel
+   yum -y install kernel-devel
+   ```
+
+2. 重新启动
+
+   ```bash
+   reboot
+   ```
+
+3. 设备 - 分配光驱 - 移除虚拟盘
+
+4. 设备 - 安装增强功能
+
+如果还不成功，也可以参见这篇博客：https://blog.csdn.net/v80/article/details/104769422
 
 当然，也可能即便按照博客做了，也只能实现鼠标的自由移动，而无法实现文件拖拽的功能。或许重启一下就可以了。。。
 
 ### 设置共享文件夹
-
-注：这个东西我没有搞定，操作方式是小甲鱼论坛的，没有验证。。。
 
 因为 VirtualBox 的拖拽功能不大好用，所以我们可以采取一个更稳妥的文件共享方案，也就是共享文件夹。
 
@@ -475,9 +492,42 @@ ln -s /usr/src/kernels/2.6.32-754.33.1.el6.i686/ /usr/src/linux
 
 选择一个待共享的文件夹，注意路径中最好不要出现中文，然后按照如下所示进行设置，点击 OK 即可：
 
-![1601722620005](EnvBuild.assets/1601722620005.png)
+![image-20201009222054807](EnvBuild.assets/image-20201009222054807.png)
 
-不写了，参见这里：https://fishc.com.cn/thread-65158-1-1.html
+点击 OK 确认后，桌面上出现了挂载的硬盘图标：
+
+![image-20201009222423920](EnvBuild.assets/image-20201009222423920.png)
+
+切换至 root 用户，输入命令将共享文件夹挂载到 `/mnt/shareV` 上：
+
+```bash
+mkdir /mnt/shareV
+mount -t vboxsf share /mnt/shareV
+```
+
+注意：如果提示 `/sbin/mount.vboxsf: mounting failed with the error: No such device`，可能是没有载入内核模块 vboxfs ，可尝试执行 `modprobe vboxsf` 命令解决。若还不成，可尝试重启。
+
+测试：在主机文件夹中放入一个文件，然后看看 `/mnt/shareV` 中是否可见：
+
+![image-20201009223027526](EnvBuild.assets/image-20201009223027526.png)
+
+虽然可以了，但是这个设置仅当此有效，当我们下次重启虚拟机还需要再切换到 root 权限，然后再执行一次 `mount -t vboxsf share /mnt/shareV` 命令挂载才能使用共享文件夹，甚是不便！
+
+为了解决这个问题，我们可以在 root 用户下编辑 `/etc/rc.d/rc.local` 文件：
+
+```bash
+vi /etc/rc.d/rc/local
+```
+
+在re.local文件最后一行添加挂载命令：
+
+```bash
+mount -t vboxsf share /mnt/shareV
+```
+
+![image-20201009223653129](EnvBuild.assets/image-20201009223653129.png)
+
+这样每次系统启动的时候都会自动运行这个挂载命令，不需要我们手动执行了。
 
 ### 配置适合 C 语言编程的 VIM 编辑器
 
@@ -546,3 +596,5 @@ alias
 ![1601731410179](EnvBuild.assets/1601731410179.png)
 
 如果没有的话输入命令 `alias vi = vim` 即可，这样以后我们就可以少打一个字母了……
+
+
